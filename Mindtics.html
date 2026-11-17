@@ -1,0 +1,411 @@
+<<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mindtics — Evaluación cognitiva asistida por IA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  :root{
+    --bg:#0A0918;
+    --bg-raised:#14122A;
+    --bg-raised-2:#1B1838;
+    --ink:#F1EFFB;
+    --ink-soft:#AEA9D6;
+    --ink-faint:#746FA0;
+    --violet:#8B5CF6;
+    --violet-soft:#C4B5FD;
+    --blue:#4D7CFE;
+    --line: rgba(241,239,251,0.12);
+    --line-strong: rgba(241,239,251,0.22);
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'Work Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+    color-scheme: dark;
+  }
+
+  *{ box-sizing: border-box; }
+  html, body{ margin:0; padding:0; }
+  body{ font-family: var(--font-body); color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  a{ color: var(--violet-soft); text-decoration: none; }
+  a:hover{ color: var(--blue); }
+  h1,h2,h3{ font-family: var(--font-display); font-weight: 500; margin:0; text-wrap: balance; }
+  p{ margin:0; line-height:1.65; }
+  ::selection{ background: var(--violet); color: var(--bg); }
+  img{ max-width:100%; }
+
+  .container{ width:100%; max-width:1080px; margin:0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); position:relative; z-index:1; }
+  .section{ padding-block: 92px; position:relative; }
+  .section-tight{ padding-block: 56px; position:relative; }
+
+  .eyebrow{ font-family: var(--font-mono); font-size:12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--violet-soft); display:flex; align-items:center; gap:10px; }
+  .eyebrow::before{ content:""; width:18px; height:1px; background: linear-gradient(90deg, var(--violet), var(--blue)); display:inline-block; }
+
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding: 13px 26px; border-radius: 999px; font-family: var(--font-body); font-weight:600; font-size:15px; border:1px solid transparent; cursor:pointer; transition: transform .18s ease, box-shadow .25s ease, border-color .18s ease, background .25s ease; }
+  .btn:active{ transform: scale(0.97); }
+  .btn-primary{ background: linear-gradient(120deg, var(--violet), var(--blue)); color: #0A0918; font-weight:700; }
+  .btn-primary:hover{ box-shadow: 0 8px 28px -6px rgba(139,92,246,0.65); transform: translateY(-1px); }
+  .btn-ghost{ background: rgba(241,239,251,0.04); color: var(--ink); border-color: var(--line-strong); }
+  .btn-ghost:hover{ border-color: var(--violet-soft); background: rgba(139,92,246,0.08); }
+
+  nav a.navlink{ color: var(--ink-soft); font-size: 14px; font-weight: 500; transition: color .15s ease; }
+  nav a.navlink:hover{ color: var(--ink); }
+
+  .card{ background: var(--bg-raised); border: 1px solid var(--line); border-radius: 18px; padding: 28px; transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease; }
+  .card:hover{ border-color: var(--line-strong); transform: translateY(-3px); box-shadow: 0 18px 40px -22px rgba(77,124,254,0.45); }
+  .tag{ font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--violet-soft); background: rgba(139,92,246,0.14); border-radius: 999px; padding: 4px 10px; display:inline-block; }
+
+  .grid-3{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 22px; }
+  .grid-2{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 24px; }
+  .row-wrap{ display:flex; flex-wrap:wrap; gap: 24px; }
+
+  .stat-num{ font-family: var(--font-display); font-size: 42px; background: linear-gradient(120deg, var(--violet-soft), var(--blue)); -webkit-background-clip:text; background-clip:text; color:transparent; font-variant-numeric: tabular-nums; }
+  .stat-label{ font-size: 14px; color: var(--ink-soft); margin-top:6px; }
+
+  .tab-row{ display:flex; flex-wrap:wrap; gap:10px; }
+  .tab-btn{ font-family: var(--font-body); font-weight:600; font-size:13.5px; padding:10px 18px; border-radius:999px; border:1px solid var(--line); background: transparent; color: var(--ink-soft); cursor:pointer; transition: all .2s ease; }
+  .tab-btn:hover{ border-color: var(--line-strong); color: var(--ink); }
+  .tab-btn.active{ background: linear-gradient(120deg, var(--violet), var(--blue)); color:#0A0918; border-color: transparent; }
+  .tab-panel{ background: var(--bg-raised); border:1px solid var(--line); border-radius:20px; padding:32px; margin-top:22px; }
+  .tab-body{ display:none; }
+  .tab-body.active{ display:flex; flex-wrap:wrap; gap:28px; align-items:flex-start; }
+
+  .faq-item{ border-top: 1px solid var(--line); }
+  .faq-item:last-child{ border-bottom: 1px solid var(--line); }
+  .faq-q-btn{ width:100%; text-align:left; background:none; border:none; cursor:pointer; padding-block:22px; display:flex; align-items:center; justify-content:space-between; gap:16px; color: var(--ink); font-family: var(--font-display); font-size: 18px; }
+  .faq-q-btn:hover{ color: var(--violet-soft); }
+  .faq-icon{ flex-shrink:0; width:22px; height:22px; position:relative; }
+  .faq-icon::before, .faq-icon::after{ content:""; position:absolute; background: var(--violet-soft); top:50%; left:50%; transform: translate(-50%,-50%); transition: transform .25s ease; }
+  .faq-icon::before{ width:14px; height:2px; }
+  .faq-icon::after{ width:2px; height:14px; }
+  .faq-item.open .faq-icon::after{ transform: translate(-50%,-50%) rotate(90deg) scale(0); }
+  .faq-a{ overflow:hidden; max-height:0; transition: max-height .3s ease; }
+  .faq-item.open .faq-a{ max-height: 260px; }
+  .faq-a-inner{ padding-bottom:24px; font-size:14.5px; color: var(--ink-soft); max-width: 62ch; }
+
+  .chat-panel{ background: var(--bg-raised-2); border:1px solid var(--line-strong); border-radius: 24px; padding: 28px; display:flex; flex-direction:column; gap:16px; box-shadow: 0 30px 60px -30px rgba(77,124,254,0.4); }
+  .chat-scroll{ display:flex; flex-direction:column; gap:12px; max-height: 360px; overflow-y:auto; padding-right:4px; }
+  .chat-bubble{ max-width: 80%; padding: 12px 16px; border-radius: 16px; font-size: 14.5px; line-height:1.5; }
+  .chat-bubble.bot{ background: rgba(241,239,251,0.07); color: var(--ink); align-self:flex-start; border-bottom-left-radius:4px; border:1px solid var(--line); }
+  .chat-bubble.user{ background: linear-gradient(120deg, var(--violet), var(--blue)); color: #0A0918; align-self:flex-end; border-bottom-right-radius:4px; font-weight:600; }
+  .chat-input-row{ display:flex; gap:10px; }
+  .chat-input{ flex:1; min-width:0; background: rgba(241,239,251,0.06); border:1px solid var(--line-strong); border-radius: 12px; padding: 12px 14px; color: var(--ink); font-family: var(--font-body); font-size: 14.5px; }
+  .chat-input::placeholder{ color: var(--ink-faint); }
+  .chat-input:focus{ outline:2px solid var(--violet); outline-offset:1px; }
+
+  .glow-orb{ position:absolute; border-radius:50%; filter: blur(90px); opacity:0.55; pointer-events:none; z-index:0; }
+  @keyframes drift{ 0%,100%{ transform: translate(0,0) scale(1); } 50%{ transform: translate(26px,-18px) scale(1.06); } }
+  @media (prefers-reduced-motion: no-preference){ .glow-orb{ animation: drift 14s ease-in-out infinite; } }
+
+  .hero-grid{ display:grid; grid-template-columns: 1.1fr 0.9fr; gap: 56px; align-items:center; }
+
+  @media (max-width: 860px){
+    .grid-3{ grid-template-columns: 1fr; }
+    .grid-2{ grid-template-columns: 1fr; }
+    .hero-grid{ grid-template-columns: 1fr; }
+    .section{ padding-block: 56px; }
+    nav .navlinks{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div style="width:100%; min-height:100%; background: var(--bg); position:relative;">
+
+  <!-- NAV -->
+  <div style="position:sticky; top:0; z-index:20; background: rgba(10,9,24,0.78); backdrop-filter: blur(10px); border-bottom:1px solid var(--line);">
+    <nav class="container" style="display:flex; align-items:center; justify-content:space-between; padding-block:16px;">
+      <a href="#inicio" style="font-family: var(--font-display); font-size:20px; color: var(--ink); font-weight:600;">Mindtics</a>
+      <div class="navlinks row-wrap" style="gap:28px; align-items:center;">
+        <a class="navlink" href="#como-funciona">Cómo funciona</a>
+        <a class="navlink" href="#pruebas">Las pruebas</a>
+        <a class="navlink" href="#asistente">Asistente</a>
+        <a class="navlink" href="#preguntas">Preguntas</a>
+      </div>
+      <a href="https://wondrous-pasca-55464c.netlify.app" class="btn btn-primary" style="padding:10px 22px; font-size:14px;">Probar evaluación</a>
+    </nav>
+  </div>
+
+  <!-- HERO -->
+  <section id="inicio" class="section" style="padding-top:88px;">
+    <div class="glow-orb" style="width:420px; height:420px; background: var(--violet); top:-120px; left:-120px;"></div>
+    <div class="glow-orb" style="width:380px; height:380px; background: var(--blue); top:60px; right:-140px; animation-delay:4s;"></div>
+    <div class="container hero-grid">
+      <div style="display:flex; flex-direction:column; gap:22px;">
+        <span class="eyebrow">Evaluación cognitiva asistida por IA</span>
+        <h1 style="font-size: 48px; line-height:1.08; letter-spacing:-0.01em;">Los primeros cambios de memoria, detectados antes de que se vuelvan evidentes.</h1>
+        <p style="font-size:17px; color: var(--ink-soft); max-width:46ch;">Mindtics convierte pruebas cognitivas breves y validadas clínicamente —invitación, Recuerdo de memoria, Describa una imagen, Quiz gramatical— en una evaluación escrita que una IA analiza en busca de señales tempranas asociadas al deterioro cognitivo y al Alzheimer.</p>
+        <div class="row-wrap" style="gap:14px; margin-top:6px;">
+          <a href="https://wondrous-pasca-55464c.netlify.app" class="btn btn-primary">Hacer la evaluación gratuita</a>
+          <a href="#como-funciona" class="btn btn-ghost">Ver cómo funciona</a>
+        </div>
+        <p style="font-size:12.5px; color: var(--ink-faint); max-width:48ch;">Mindtics es una herramienta de tamizaje de apoyo. No sustituye el diagnóstico de un profesional de la salud.</p>
+      </div>
+  </section>
+
+  <!-- POR QUÉ IMPORTA -->
+  <section class="section-tight" style="background: var(--bg-raised); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+    <div class="container">
+      <div class="grid-3">
+        <div>
+          <div class="stat-num">60–70%</div>
+          <div class="stat-label">de los casos de demencia en el mundo corresponden a la enfermedad de Alzheimer, según la OMS.</div>
+        </div>
+        <div>
+          <div class="stat-num" id="min-counter">0 min</div>
+          <div class="stat-label">dura en promedio la batería de pruebas escritas que ofrece Mindtics, pensada para repetirse sin fatiga.</div>
+        </div>
+        <div>
+          <div class="stat-num">+1</div>
+          <div class="stat-label">consulta temprana con un especialista puede abrir acceso a seguimiento, tratamiento y planificación a tiempo.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CÓMO FUNCIONA / TABS -->
+  <section id="como-funciona" class="section">
+    <div class="container">
+      <div style="max-width:60ch; margin-bottom:34px;">
+        <span class="eyebrow">Cómo funciona</span>
+        <h2 style="font-size:32px; margin-top:14px;">Cuatro pruebas escritas, un patrón que la IA aprende a leer.</h2>
+        <p style="font-size:15px; color: var(--ink-soft); margin-top:12px;">Toca cada prueba para ver qué mide.</p>
+      </div>
+
+      <div class="tab-row" id="tab-row"></div>
+      <div class="tab-panel" id="tab-panel"></div>
+
+      <div class="grid-2" style="margin-top:28px;">
+        <div class="card">
+          <span class="tag">Después</span>
+          <h3 style="font-size:17px; margin-top:12px;">Análisis con IA</h3>
+          <p style="font-size:14px; color: var(--ink-soft); margin-top:8px;">Un modelo entrenado compara los resultados con patrones de referencia y genera una puntuación de riesgo, no un diagnóstico.</p>
+        </div>
+        <div class="card">
+          <span class="tag">Después</span>
+          <h3 style="font-size:17px; margin-top:12px;">Reporte para tu médico</h3>
+          <p style="font-size:14px; color: var(--ink-soft); margin-top:8px;">Se genera un informe claro, pensado para compartir con un neurólogo o geriatra en la siguiente consulta.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRUEBAS / CIENCIA -->
+  <section id="pruebas" class="section-tight" style="background: var(--bg-raised); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+    <div class="container grid-2" style="align-items:center;">
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <span class="eyebrow">Respaldo clínico</span>
+        <h2 style="font-size:28px;">Basado en pruebas que ya usan los profesionales de la salud.</h2>
+        <p style="font-size:15px; color: var(--ink-soft);">Mindtics no inventa una prueba nueva: digitaliza instrumentos de tamizaje ya validados —como el Mini-Mental State Examination (MMSE) al cual aspiramos añadir proximamente en nuesto test , el Mini-Cog y pruebas de fluidez semántica— y usa un modelo de lenguaje para puntuar patrones de escritura, tiempos de respuesta y errores que son difíciles de notar a simple vista.</p>
+        <p style="font-size:15px; color: var(--ink-soft);">El resultado nunca reemplaza una evaluación neuropsicológica completa. Está diseñado para ayudar a decidir cuándo vale la pena pedir una cita con un especialista.</p>
+      </div>
+      <div class="card">
+        <h3 style="font-size:16px; margin-bottom:16px;">Lo que mide cada sesión</h3>
+        <div style="display:flex; flex-direction:column; gap:14px; font-family: var(--font-mono); font-size:13px;">
+          <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding-bottom:10px;"><span style="color: var(--ink-soft);">Fluidez semántica</span><span style="color: var(--violet-soft);">palabras / min</span></div>
+          <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding-bottom:10px;"><span style="color: var(--ink-soft);">Retención de datos</span><span style="color: var(--violet-soft);"></span></div>
+          <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding-bottom:10px;"><span style="color: var(--ink-soft);">Retención visual</span><span style="color: var(--violet-soft);"></span></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color: var(--ink-soft);">Coherencia narrativa</span><span style="color: var(--violet-soft);">palabras / min</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PARA QUIÉN -->
+  <section class="section">
+    <div class="container" style="display:flex; flex-direction:column; gap:36px;">
+      <div style="max-width:60ch;">
+        <span class="eyebrow">Para quién es Mindtics</span>
+        <h2 style="font-size:28px; margin-top:14px;">Tres formas de empezar a usarlo.</h2>
+      </div>
+      <div class="grid-3">
+        <div class="card">
+          <h3 style="font-size:18px;">Familias y cuidadores</h3>
+          <p style="font-size:14px; color: var(--ink-soft); margin-top:10px;">Haz la evaluación en casa con un familiar mayor, en un ambiente tranquilo y sin presión de consultorio.</p>
+        </div>
+        <div class="card">
+          <h3 style="font-size:18px;">Adultos que quieren monitorearse</h3>
+          <p style="font-size:14px; color: var(--ink-soft); margin-top:10px;">Repite la prueba cada pocos meses y observa tu propia tendencia a lo largo del tiempo.</p>
+        </div>
+        <div class="card">
+          <h3 style="font-size:18px;">Clínicas y consultorios</h3>
+          <p style="font-size:14px; color: var(--ink-soft); margin-top:10px;">Ofrece Mindtics como tamizaje previo a la consulta y llega con un reporte estructurado desde el primer minuto.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ASISTENTE / CHAT -->
+  <section id="asistente" class="section-tight" style="position:relative;">
+    <div class="glow-orb" style="width:360px; height:360px; background: var(--blue); bottom:-100px; left:-100px; animation-delay:2s;"></div>
+    <div class="container grid-2" style="align-items:center;">
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <span class="eyebrow">Asistente Mindtics</span>
+        <h2 style="font-size:28px;">Habla con el asistente antes de empezar.</h2>
+        <p style="font-size:15px; color: var(--ink-soft);">El asistente explica el proceso, resuelve dudas y agenda la primera evaluación.</p>
+        <ul style="padding-left:18px; display:flex; flex-direction:column; gap:8px; font-size:14px; color: var(--ink-soft);">
+          <li>Explica en qué consiste cada prueba</li>
+          <li>Agenda la evaluación gratuita</li>
+          <li>Deriva a un profesional si detecta señales de alarma</li>
+        </ul>
+      </div>
+
+      <div class="chat-panel">
+        <div class="chat-scroll" id="chat-scroll"></div>
+        <div class="chat-input-row">
+          <input class="chat-input" id="chat-input" type="text" placeholder="Escribe tu pregunta...">
+          <button class="btn btn-primary" style="padding:0 20px;" id="chat-send">Enviar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="preguntas" class="section">
+    <div class="container" style="max-width:760px;">
+      <span class="eyebrow">Preguntas frecuentes</span>
+      <h2 style="font-size:28px; margin-top:14px; margin-bottom:8px;">Antes de empezar</h2>
+      <div id="faq-list"></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <section style="background: var(--bg-raised); border-top:1px solid var(--line); color: var(--ink-soft);">
+    <div class="container" style="padding-block:40px; display:flex; flex-wrap:wrap; justify-content:space-between; gap:20px; align-items:center;">
+      <span style="font-family: var(--font-display); font-size:18px; color: var(--ink);">Mindtics</span>
+      <p style="font-size:13px; max-width:50ch; color: var(--ink-faint);">Herramienta de tamizaje cognitivo asistida por IA. No sustituye el diagnóstico ni el tratamiento de un profesional de la salud.</p>
+      <span style="font-size:13px;">hola@mindtics.com</span>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/ochceilvgzl3zckhtviea3xwaxoodken";
+
+  // --- Contador animado de minutos ---
+  (function animateMinutes(){
+    const el = document.getElementById('min-counter');
+    let n = 0;
+    const id = setInterval(() => {
+      n += 1;
+      el.textContent = n + ' min';
+      if (n >= 8) clearInterval(id);
+    }, 90);
+  })();
+
+  // --- Tabs "Cómo funciona" ---
+  const STEPS = [
+    { label: 'Invitación', tagNum: '01', title: 'Invitación', metric: 'Fluidez semántica', detail: 'Redacta una invitación detallada de cualquier evento.' },
+    { label: 'Recuedo de memoria', tagNum: '02', title: 'Recuedo de memoria', metric: 'Retención de datos', detail: 'Se pide describir un día especial, como el dia de su cumpleaños, navidad, aniversario entre otros.' },
+    { label: 'Describa una imagen', tagNum: '03', title: 'Describa una imagen', metric: 'Retención visual', detail: 'Descripción escrita de una imagen, para observar coherencia y construcción de frases para saber su retención visual.' },
+    { label: 'Quiz Gramatical', tagNum: '04', title: 'Quiz Gramatical', metric: 'Coherencia narrativa', detail: 'Correción de un escrito con varios errores gramaticales.' }
+  ];
+  let activeStep = 0;
+  const tabRow = document.getElementById('tab-row');
+  const tabPanel = document.getElementById('tab-panel');
+
+  function renderTabs(){
+    tabRow.innerHTML = STEPS.map((s,i) =>
+      `<button class="tab-btn ${i===activeStep?'active':''}" data-i="${i}">${s.label}</button>`
+    ).join('');
+    const s = STEPS[activeStep];
+    tabPanel.innerHTML = `
+      <div style="display:flex; flex-wrap:wrap; gap:28px; align-items:flex-start;">
+        <div style="flex: 1 1 320px; min-width:0; display:flex; flex-direction:column; gap:14px;">
+          <span class="tag">${s.tagNum}</span>
+          <h3 style="font-size:22px;">${s.title}</h3>
+          <p style="font-size:15px; color: var(--ink-soft);">${s.detail}</p>
+        </div>
+        <div style="flex: 0 0 220px; display:flex; flex-direction:column; gap:10px; font-family: var(--font-mono); font-size:12.5px; color: var(--ink-faint); background: rgba(139,92,246,0.08); border:1px solid var(--line); border-radius:14px; padding:18px;">
+          <span style="color: var(--violet-soft); letter-spacing:0.06em; text-transform:uppercase; font-size:11px;">Mide</span>
+          <span style="color: var(--ink);">${s.metric}</span>
+        </div>
+      </div>`;
+    tabRow.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => { activeStep = Number(btn.dataset.i); renderTabs(); });
+    });
+  }
+  renderTabs();
+
+  // --- FAQ acordeón ---
+  const FAQS = [
+    { q: '¿Mindtics diagnostica Alzheimer?', a: 'No. Es una herramienta de tamizaje: identifica señales que justifican una evaluación con un neurólogo, geriatra o neuropsicólogo. El diagnóstico siempre lo hace un profesional de la salud.', open: true },
+    { q: '¿Qué edad debe tener la persona evaluada?', a: 'Las pruebas están pensadas cualquier edad pero, se recomienda para adultos de 50 años en adelante, especialmente quienes tienen antecedentes familiares o notan cambios en su memoria.', open: false },
+    { q: '¿Qué pasa con los datos de la evaluación?', a: 'Las respuestas se usan únicamente para generar el reporte de la persona evaluada y no se comparten con terceros sin su consentimiento.', open: false },
+    { q: '¿Puedo repetir la evaluación?', a: 'Sí. Repetirla cada 3 a 6 meses ayuda a observar si hay cambios en la tendencia, que es más útil que un solo resultado aislado.', open: false }
+  ];
+  const faqList = document.getElementById('faq-list');
+
+  function renderFaqs(){
+    faqList.innerHTML = FAQS.map((f,i) => `
+      <div class="faq-item ${f.open?'open':''}" data-i="${i}">
+        <button class="faq-q-btn">
+          <span>${f.q}</span>
+          <span class="faq-icon"></span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">${f.a}</div></div>
+      </div>`).join('');
+    faqList.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q-btn').addEventListener('click', () => {
+        const i = Number(item.dataset.i);
+        FAQS[i].open = !FAQS[i].open;
+        renderFaqs();
+      });
+    });
+  }
+  renderFaqs();
+
+  // --- Chat conectado al webhook de Make ---
+  const chatScroll = document.getElementById('chat-scroll');
+  const chatInput = document.getElementById('chat-input');
+  const chatSend = document.getElementById('chat-send');
+  let messages = [
+    { from: 'bot', text: 'Hola, soy el asistente de Mindtics. Puedo explicarte cómo funciona la evaluación o ayudarte a agendar una prueba. ¿Por dónde quieres empezar?' }
+  ];
+  let sending = false;
+
+  function renderChat(){
+    chatScroll.innerHTML = messages.map(m =>
+      `<div class="chat-bubble ${m.from}">${m.text}</div>`
+    ).join('');
+    chatScroll.scrollTop = chatScroll.scrollHeight;
+  }
+  renderChat();
+
+  async function sendMessage(){
+    const text = chatInput.value.trim();
+    if (!text || sending) return;
+    messages.push({ from: 'user', text });
+    chatInput.value = '';
+    sending = true;
+    renderChat();
+
+    let botText = 'No pude contactar al asistente en este momento. Inténtalo de nuevo en unos segundos.';
+    try {
+      const res = await fetch(MAKE_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, source: 'mindtics-landing' })
+      });
+      if (res.ok) {
+        const data = await res.text().catch(() => '');
+        botText = (data && data.trim()) || 'Recibido. En breve te contactamos.';
+      }
+    } catch (err) {
+      console.error('Error llamando al webhook de Make:', err);
+    }
+
+    messages.push({ from: 'bot', text: botText });
+    sending = false;
+    renderChat();
+  }
+
+  chatSend.addEventListener('click', sendMessage);
+  chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+  });
+</script>
+
+</body>
+</html>
